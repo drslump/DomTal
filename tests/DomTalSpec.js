@@ -69,7 +69,7 @@ describe('DomTal', function(){
             tal = new DomTal('<div>${structure foo}</div>');
             dom = tal.run({foo:'<br/>'});
             $expect(dom).not.toContain('br');
-            $expect(dom).toHaveText(/br/);
+            $expect(dom).toHaveText(/br/i);
         });
 
     });
@@ -263,10 +263,10 @@ describe('DomTal', function(){
                 dom = tal.run();
                 $expect('a', dom).toHaveAttr('href', 'google.com');
 
-                tal.load('<a tal:attributes="class foo; href \'google.com\'">foo<a/>');
+                tal.load('<a tal:attributes="name foo; href \'google.com\'">foo</a>');
                 dom = tal.run({foo:'FOO'});
                 $expect('a', dom).toHaveAttr('href', 'google.com');
-                $expect('a', dom).toHaveAttr('class', 'FOO');
+                $expect('a', dom).toHaveAttr('name', 'FOO');
             });
 
             it('should define boolean attributes', function(){
