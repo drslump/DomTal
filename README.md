@@ -6,8 +6,9 @@ copyright (c) 2005-2011 Iván -DrSlump- Montes <http://pollinimini.net>
 
 
 ## Credits:
-  - The script is based on work from Joachim Zobel <http://heute-morgen.de> (used with permission)
-  - The API and template syntax follows the one from PHPTAL <http://phptal.motion-twin.com>
+
+  - The script is based on work from Joachim Zobel <http://www.heute-morgen.de/test/About_DOMTAL.html> (used with permission)
+  - The API and template syntax follows the one from PHPTAL <http://phptal.org>
 
 
 ## Notes: Known issues
@@ -108,13 +109,12 @@ use library.
 To extend the available processors we only need to create (or redefine) a
 method in *DomTal.processors*. Be aware that the order in which the
 processor methods are defined in the code specify their priority. The
-standard ones are applied in this order:
+standard ones are applied in this order: `define`, `condition`, `repeat`, 
+`content`, `replace`, `attributes`, `omit-tag`
 
-    _define_, _condition_, _repeat_, _content_, _replace_, _attributes_, _omit-tag_
-
-The return value of a processor has meaning. If it returns _true_ then the
+The return value of a processor has meaning. If it returns `true` then the
 children elements of that node will be further processed, alternatively, if
-it returns _false_ its children will be skipped.
+it returns `false` its children will be skipped.
 
 We are going to create a new processor which will convert an array items to
 a set of LI elements. It'll apply a class named 'selected' to the LI whose
