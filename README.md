@@ -14,9 +14,9 @@ copyright (c) 2005-2011 Iván -DrSlump- Montes <http://pollinimini.net>
 
   - This script uses the own browser to parse the html, so you must be
     carefull with the validity of the code. A common mistake is to use the short
-    syntax '<tag />' for elements which shouldn't according to the standard.
-    It's always a good idea to use always the full syntax (except for <br/> and
-    <hr/>) even when no content is defined.
+    syntax `<tag />` for elements which shouldn't according to the standard.
+    It's always a good idea to use always the full syntax (except for `<br/>` and
+    `<hr/>`) even when no content is defined.
 
   - In Internet Explorer the tal attributes (processors) can't be removed from
     the generated code although this shouldn't affect anything.
@@ -37,7 +37,7 @@ copyright (c) 2005-2011 Iván -DrSlump- Montes <http://pollinimini.net>
 
 ## Notes: TODO
 
-    - Check for performance bottlenecks and memory leaks
+  - Check for performance bottlenecks and memory leaks
 
 
 # Usage
