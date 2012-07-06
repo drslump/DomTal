@@ -66,7 +66,7 @@ describe('DomTal', function(){
         });
 
         it('should interpolate ignoring structure flag', function(){
-            tal = new DomTal('<div>${structure foo}</div>');
+            tal = new DomTal('<div>${structure:foo}</div>');
             dom = tal.run({foo:'<br/>'});
             $expect(dom).not.toContain('br');
             $expect(dom).toHaveText(/br/i);
@@ -127,7 +127,7 @@ describe('DomTal', function(){
             });
 
             it('inserting HTML content', function(){
-                tal.load('<span tal:content="structure foo" />');
+                tal.load('<span tal:content="structure:foo" />');
                 dom = tal.run({foo: 'foo<br/>bar'});
                 $expect('span', dom).toContain('br');
             });
@@ -149,7 +149,7 @@ describe('DomTal', function(){
             });
 
             it('replacing with HTML content', function(){
-                tal.load('<span tal:replace="structure foo" />');
+                tal.load('<span tal:replace="structure:foo" />');
                 dom = tal.run({foo: 'foo<br/>bar'});
                 $expect(dom).not.toContain('span');
                 $expect(dom).toContain('br');
@@ -223,7 +223,7 @@ describe('DomTal', function(){
             });
 
             it('should iterarte over object', function(){
-                tal.load('<li tal:repeat="foo object">${repeat/foo/key}:${foo}</li>');
+                tal.load('<li tal:repeat="foo object">${repeat.foo.key}:${foo}</li>');
                 dom = tal.run({object:{a:1,b:2,c:3,d:4,e:5}});
                 $dom = $expect(dom).actual;
                 expect($('li', $dom).length).toBe(5);
@@ -323,7 +323,7 @@ describe('DomTal', function(){
 
         // Helper function
         function tales(exp){
-            return expect(tal.tales(exp));
+            return expect(tal.tales([exp]));
         }
 
 
@@ -331,17 +331,21 @@ describe('DomTal', function(){
             it('should access main level variables', function(){
                 tales('foo').toBe('FOO');
                 tales('boolTrue').toBe(true);
-                tales('missing').toBe(undefined);
+                try {
+                    tales('missing');
+                    false.toBe(true);
+                } catch (e) {
+                }
             });
 
             it('should access array elements by index', function(){
-                tales('array.1').toBe(2);
+                tales('array[1]').toBe(2);
             });
 
             it('should access nested structures', function(){
                 tales('level0.level1.level2.value').toBe('LEVEL2');
-                tales('level0/level1/level2/value').toBe('LEVEL2');
-                tales('level0/level1.level2/level3.value').toBe('LEVEL3');
+                tales('level0.level1.level2.value').toBe('LEVEL2');
+                tales('level0.level1.level2.level3.value').toBe('LEVEL3');
             });
         });
 
@@ -350,14 +354,8 @@ describe('DomTal', function(){
                 tales("'this is a string'").toBe('this is a string');
                 tales("   'string'   ").toBe('string');
                 tales("'  string  '").toBe('  string  ');
-                tales("'escaped''quote'").toBe("escaped'quote");
-                tales("'interpolate ${foo}'").toBe('interpolate FOO');
-            });
-
-            it('should support non-quoted strings', function(){
-                tales('string: this is a string').toBe('this is a string');
-                tales("string: quoted 'string'").toBe("quoted 'string'");
-                tales("string: interpolate ${foo}").toBe('interpolate FOO');
+                tales("'escaped\\'quote'").toBe("escaped'quote");
+                tales("'concatenated ' + foo + ' string'").toBe('concatenated FOO string');
             });
         });
 
@@ -384,9 +382,9 @@ describe('DomTal', function(){
 
         describe('Js', function(){
             it('should evaluate javascript', function(){
-                tales('js:1+1').toBe(2);
+                tales('1+1').toBe(2);
                 tales("js:'foo'.indexOf('o')").toBe(1);
-                tales("js:'${foo}'.indexOf('O')").toBe(1);
+                tales("js:foo.indexOf('O')").toBe(1);
             });
         });
 
@@ -426,17 +424,6 @@ describe('DomTal', function(){
                 tales("float:'123.32'").toBe(123.32);
             });
         });
-
-        describe('Fixed', function(){
-            it('should cast to float with fixed decimals', function(){
-                tales('fixed:2 0').toBe('0.00');
-                tales('fixed:1 12.32').toBe('12.3');
-                tales('fixed:1 12.68').toBe('12.7');
-                tales("fixed:2 'foo'").toBe('0.00');
-                tales("fixed:2 '123'").toBe('123.00');
-                tales("fixed:2 '123.32321'").toBe('123.32');
-            });
-        });
     });
 
     describe('Tales', function(){
@@ -451,22 +438,27 @@ describe('DomTal', function(){
             str: 'str'
         });
 
+        function expr(exp){
+            exp = new DomTal.ExpressionParser(exp);
+            return tal.tales(exp.tales())
+        }
+
         describe('Alternation', function(){
             it('should support alternation', function(){
-                expect(tal.tales('empty | one')).toBe(1);
-                expect(tal.tales('empty | zero | falsy | one')).toBe(1);
-                expect(tal.tales('empty | zero | falsy')).toBe(false);
-                expect(tal.tales('empty | 0 | 1')).toBe(1);
+                expect(expr('empty | one')).toBe(1);
+                expect(expr('empty | zero | falsy | one')).toBe(1);
+                expect(expr('empty | zero | falsy')).toBe(false);
+                expect(expr('empty | 0 | 1')).toBe(1);
             });
 
             it('should support nothing keyword', function(){
-                expect(tal.tales('empty | one | nothing')).toBe(1);
-                expect(tal.tales('empty | nothing')).toBe(DomTal.NOTHING);
+                expect(expr('empty | one | nothing')).toBe(1);
+                expect(expr('empty | nothing')).toBe(DomTal.NOTHING);
             });
 
             it('should support default keyword', function(){
-                expect(tal.tales('empty | one | default')).toBe(1);
-                expect(tal.tales('empty | default')).toBe(DomTal.DEFAULT);
+                expect(expr('empty | one | default')).toBe(1);
+                expect(expr('empty | default')).toBe(DomTal.DEFAULT);
             });
         });
     });
