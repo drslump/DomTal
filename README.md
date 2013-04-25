@@ -87,7 +87,7 @@ that we can create the data set anyway we want, even loading it with JSON or
 similar remoting methods.
 
      var tpl = new DomTal();
-     tpl->set( 'users', [{
+     tpl.set( 'users', [{
        name: 'Joe Black',
        email: 'jblack@yahoo.co.uk'
      }, {
