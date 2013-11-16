@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<title>DOM TAL test</title>
+	
+	<script type="text/javascript" charset="utf-8" src="domtal.js"></script>
+	<script type="text/javascript" charset="utf-8">
+				
+		var tpl = new DOMTAL();
+		
+		function addUser() {
+			//tpl.setTemplate( document.getElementById('userTemplate') );
+			tpl.setTemplate( document.getElementById('userTemplateScript') );
+
+			//console.log(tpl.tpl);
+			tpl.set( '', { 
+				name: document.getElementById('username').value,
+				email: document.getElementById('email').value
+			});
+			document.getElementById('users').appendChild( tpl.run() );
+		}
+	</script>	
+</head>
+<body>
+	
+	<div id="userTemplate" style="display:none">
+		<div class="user">
+			<h3 tal:content="name">User Name</h3>
+			<strong>e-mail</strong>: 
+				<a tal:attributes="href 'mailto:${email}'" 
+					tal:content="email">
+					mail@domain.com
+				</a>
+		</div>
+	</div>
+	
+	<script id="userTemplateScript" type="template/domtal"><![CDATA[
+		<div class="user">
+			<h3 tal:content="name">User Name</h3>
+			<strong>e-mail</strong>: 
+			<a tal:attributes="href 'mailto:${email}'" 
+				tal:content="email">
+				mail@domain.com
+			</a>
+		</div>
+	]]></script>
+	
+	<div id="addUser">
+		<label for="username">User name</label> 
+		<input type="text" id="username" name="username" /><br/>
+		<label for="email">E-Mail</label>
+		<input type="text" id="email" name="email" /><br/>
+		
+		<input type="button" name="adduser" value="Add User" onclick="addUser()" />
+	</div>
+		
+	<div id="users">
+	</div>	
+</body>
+</html>

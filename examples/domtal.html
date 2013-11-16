@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:tal="http://blog.netxus.es/xmlns/domtal/2005">
+<head>
+<title>DOM TAL Test</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src="/firebug/firebug.js"></script>
+
+<script type="text/javascript" src="domtal.js"></script>
+
+<script type="text/javascript" charset="utf-8">
+//<![CDATA[
+function run() {
+
+    myData = {
+        'bool': true,
+        'boolFalse': false,
+        'title': 'the <em>title</em> value',
+        'color': 'red',
+        'list': [ 'one', 'two', 'three' ],
+        'result': [
+            {
+                'name': 'foo',
+                'phone': '01-344-121-021',
+                'langs': [ 'es', 'ca' ]
+            },
+            {
+                'name': 'bar',
+                'phone': '05-999-165-541',
+                'langs': [ 'en' ]
+            },
+            {
+                'name': 'baz',
+                'phone': '01-389-321-024',
+                'langs': [ 'en', 'fr' ]
+            },
+            {
+                'name': 'buz',
+                'phone': '05-321-378-654',
+                'langs': [ 'de', 'it', 'pt' ]
+            }
+        ]
+    };
+
+    // create a new tales modifier
+    DOMTAL.prototype.modifiers.implode = function( exp ) {
+        var sep, result;
+        exp = this._splitExpression( exp, ' ' );
+        if (exp.length > 1) {
+            sep = exp.shift();
+            result = this._getIterable( this.tales(exp.join(' ')) );
+            return result['values'].join( this.tales(sep) );
+        }
+    }
+
+    DOMTAL.prototype.log = function( msg ) {
+        if (console)
+            console.log( msg );
+    }
+
+    var tpl = new DOMTAL(myData);
+
+    tpl.load( '#template' );
+    var out = tpl.run();
+    document.getElementById('template').parentNode.appendChild( out );
+}
+//]]>
+</script>
+</head>
+<body id="template">
+	<span tal:define="global defContent">
+		This is a <strong>content defined</strong> variable
+	</span>
+	<div tal:define="defContent 'This is a <strong>content</strong> variable'">
+		<span tal:content="structure defContent"></span>
+	</div>
+	<pre tal:content="structure defContent"></pre>
+
+    <span tal:content="implode: ', ' js:['one','two','three']"></span>
+
+	<h1 tal:replace="">
+		<a href="#" onclick="run(); return false">Run</a>
+	</h1>
+
+    <h3 tal:content="boolFalse | default">
+    	This is a default text and shouldn't be replaced
+    </h3>
+
+    <pre tal:replace="structure title">
+    	this has to be replaced by html code (structure title)
+    </pre>
+
+    <p tal:condition="not: bool">
+    	<em>not</em> tales operator, this should be removed
+    </p>
+
+	<p tal:condition="js: !${boolFalse}">
+		Condition JS
+	</p>
+
+	<span tal:omit-tag="1" 
+		tal:define="test 'this is a defined;; string'; global defGlobal 'a defined global'"
+		tal:content="test">
+	</span>
+
+	<p>${defGlobal}</p>
+
+    <p tal:condition="exists:boolFalse">
+    	Condition EXISTS - ${title2 | title}
+    </p>
+
+    <pre tal:omit-tag="bool">
+    	- <span tal:content="title">Title</span>
+    </pre>
+
+    <ul>
+    	<li tal:repeat="item js: ['a','b','c']" tal:content="item">0</li>
+    	<li tal:repeat="item js:new Array(3)">Item #${repeat/item/key}</li>
+    	<li tal:repeat="item js:{a:'Andorra',b:'Barcelona',c:'Chicago'}" 
+    		tal:content="'${repeat/item/key}: ${item}'">
+    		-
+    	</li>
+    </ul>
+
+    <p>
+    	${js: 1+1}
+    </p>
+
+    <table border="1" tal:attributes="border 3">
+      <thead>
+        <tr>
+          <th>name</th>
+          <th>phone</th>
+          <th>langs</th>
+          <th>langs2</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr tal:repeat="item result">
+          <td tal:content="item/name">item name</td>
+          <td>+${item/phone}</td>
+          <td>
+          	<span
+          	    tal:omit-tag="1"
+          		tal:repeat="lang item/langs"
+          		tal:replace="js: '${lang}'+(${repeat/lang/end}?'':', ')">
+          	</span>
+          </td>
+          <td tal:content="implode: ', ' item/langs">-
+          </td>
+        </tr>
+        <tr tal:replace="">
+          <td>sample name</td>
+          <td>sample phone</td>
+        </tr>
+        <tr tal:replace="">
+          <td>sample name</td>
+          <td>sample phone</td>
+        </tr>
+      </tbody>
+    </table>
+
+</body>
+</html>
